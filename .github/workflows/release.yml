@@ -33,7 +33,7 @@ jobs:
                   git config --global user.name "pltnkvart"
                   git config --global user.email "artosi@yandex.ru"
 
-            - name: Create release branch
+            - name: Create release branch and tag
               run: |
                   git checkout -b releases/${{ github.run_number }}
                   git push origin releases/${{ github.run_number }}
@@ -42,7 +42,7 @@ jobs:
 
     build-and-push-docker-image:
         runs-on: ubuntu-latest
-        needs: create-release-branch
+        needs: create-release-branch-and-tag
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
@@ -60,24 +60,17 @@ jobs:
                   docker push cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.run_number }}
                   docker push cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.run_number }}_latest
 
-    create-release-tag:
-        runs-on: ubuntu-latest
-        needs: build-and-push-docker-image
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
-
-            - name: Create release tag
-              run: |
-                  git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
-                  git push origin --tags
-
     create-issue:
         runs-on: ubuntu-latest
         needs: create-release-tag
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
+
+            - name: Set up Git user
+              run: |
+                  git config --global user.name "pltnkvart"
+                  git config --global user.email "artosi@yandex.ru"
 
             - name: Get previous tag
               id: prev-tag
@@ -105,6 +98,11 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
+
+            - name: Set up Git user
+              run: |
+                  git config --global user.name "pltnkvart"
+                  git config --global user.email "artosi@yandex.ru"
 
             - name: Get previous tag
               id: prev-tag
