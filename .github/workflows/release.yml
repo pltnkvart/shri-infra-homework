@@ -94,7 +94,7 @@ jobs:
                       Дата: ${{ env.CURRENT_DATE }}
                       Автор релиза: ${{ github.actor }}
                       Номер версии: ${{ github.run_number }}
-                      Docker образ: [Ссылка](http://cr.yandex/crpq1kj1kt8f62udc6t3/app:${{ github.run_number }}_latest)
+                      Docker образ: http://cr.yandex/crpq1kj1kt8f62udc6t3/app:${{ github.run_number }}_latest
 
     update-changelog:
         runs-on: ubuntu-latest
