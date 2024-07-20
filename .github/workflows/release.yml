@@ -6,7 +6,7 @@ on:
 jobs:
     lint-and-test:
         runs-on: ubuntu-latest
-        uses: ./.github/workflows/github-actions.yml
+        uses: ./.github/workflows/test-and-lint.yml
 
     create-release-branch:
         runs-on: ubuntu-latest
