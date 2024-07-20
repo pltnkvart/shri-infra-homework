@@ -82,6 +82,8 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
 
             - name: Create Release Issue
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |
                   commit_list=$(git log --oneline $latest_tag)
                   gh issue create \
