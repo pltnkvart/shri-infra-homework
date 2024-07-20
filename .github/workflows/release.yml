@@ -72,25 +72,29 @@ jobs:
                   git config --global user.name "pltnkvart"
                   git config --global user.email "artosi@yandex.ru"
 
-            - name: Get previous tag
-              id: prev-tag
-              run: echo "::set-output name=tag::$(git describe --tags --abbrev=0 HEAD^)"
+            - name: Set Date
+              run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
-            - name: Get commit list
-              id: commits
-              run: echo "::set-output name=list::$(git log ${{ steps.prev-tag.outputs.tag }}..HEAD --oneline)"
+            - name: Create Release Label
+              run: |
+                  gh label create "release-${{ github.run_number }}" || echo "Label already exists"
+              env:
+                  GH_TOKEN: ${{ github.token }}
 
-            - name: Create release issue
-              uses: peter-evans/create-issue-from-file@v4
-              with:
-                  title: Release ${{ github.run_number }}
-                  content-file: |
-                      Date: $(date +'%Y-%m-%d')
-                      Author: ${{ github.actor }}
-                      Version: ${{ github.run_number }}
-                      Commits:
-                      ${{ steps.commits.outputs.list }}
-                      Docker image link: cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.run_number }}
+            - name: Create Release Issue
+              run: |
+                  gh issue create \
+                    --title "$TITLE" \
+                    --body "$BODY" \
+                    --label "$LABELS"
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TITLE: "Release ${{ github.run_number }}"
+                  BODY: |
+                      Дата: ${{ env.CURRENT_DATE }}
+                      Автор релиза: ${{ github.actor }}
+                      Номер версии: ${{ github.run_number }}
+                      Docker образ: [Ссылка](http://cr.yandex/crpq1kj1kt8f62udc6t3/app:${{ github.run_number }}_latest)
 
     update-changelog:
         runs-on: ubuntu-latest
@@ -104,24 +108,21 @@ jobs:
                   git config --global user.name "pltnkvart"
                   git config --global user.email "artosi@yandex.ru"
 
-            - name: Get previous tag
-              id: prev-tag
-              run: echo "::set-output name=tag::$(git describe --tags --abbrev=0 HEAD^)"
-
-            - name: Get commit list
-              id: commits
-              run: echo "::set-output name=list::$(git log ${{ steps.prev-tag.outputs.tag }}..HEAD --oneline)"
-
-            - name: Update CHANGELOG.md
+            - name: Update changelog
               run: |
-                  echo "## ${{ github.run_number }} - $(date +'%Y-%m-%d')" > tmpfile
-                  echo "" >> tmpfile
-                  echo "${{ steps.commits.outputs.list }}" >> tmpfile
-                  echo "" >> tmpfile
-                  cat CHANGELOG.md >> tmpfile
-                  mv tmpfile CHANGELOG.md
-                  git config --global user.name "${{ github.actor }}"
-                  git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+                  git fetch --tags
+                  latest_tag=$(git describe --tags --abbrev=0)
+                  echo "Latest tag: $latest_tag"
+                  echo "## Release ${{ github.run_number }} - $(date)" > temp_CHANGELOG.md
+                  echo >> temp_CHANGELOG.md
+                  git log --pretty=format:"- %s" $latest_tag..HEAD >> temp_CHANGELOG.md
+                  echo >> temp_CHANGELOG.md
+                  echo "Current CHANGELOG.md content:"
+                  cat CHANGELOG.md
+                  cat CHANGELOG.md >> temp_CHANGELOG.md
+                  mv temp_CHANGELOG.md CHANGELOG.md
+                  echo "Updated CHANGELOG.md content:"
+                  cat CHANGELOG.md
                   git add CHANGELOG.md
                   git commit -m "Update CHANGELOG for release ${{ github.run_number }}"
                   git push origin releases/${{ github.run_number }}
