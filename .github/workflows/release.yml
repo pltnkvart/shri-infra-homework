@@ -83,18 +83,14 @@ jobs:
 
             - name: Create Release Issue
               run: |
+                  commit_list=$(git log --oneline $latest_tag)
                   gh issue create \
-                    --title "$TITLE" \
-                    --body "$BODY" \
-                    --label "$LABELS"
-              env:
-                  GH_TOKEN: ${{ github.token }}
-                  TITLE: "Release ${{ github.run_number }}"
-                  BODY: |
-                      Дата: ${{ env.CURRENT_DATE }}
-                      Автор релиза: ${{ github.actor }}
-                      Номер версии: ${{ github.run_number }}
-                      Docker образ: http://cr.yandex/crpq1kj1kt8f62udc6t3/app:${{ github.run_number }}_latest
+                    --title "Release ${{ github.run_number }}" \
+                    --body "$(echo -e "**Date:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")<br> \
+                      **Author:** ${{ github.actor }}<br> \
+                      **Version:** ${{ github.run_number }}<br> \
+                      **Commits:**<br>$commit_list<br> \
+                      **Docker Image:** cr.yandex/crpvtl1jahgdv5iobshc/app:${{ github.run_number }}")"
 
     update-changelog:
         runs-on: ubuntu-latest
