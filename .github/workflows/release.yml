@@ -110,6 +110,7 @@ jobs:
 
             - name: Update changelog
               run: |
+                  git checkout releases/${{ github.run_number }}
                   git fetch --tags
                   latest_tag=$(git describe --tags --abbrev=0)
                   echo "Latest tag: $latest_tag"
