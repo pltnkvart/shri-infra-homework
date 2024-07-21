@@ -85,7 +85,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
-                  commit_list=$(git log --oneline $latest_tag)
+                  commit_list=$(git log --oneline $latest_tag..HEAD)
                   gh issue create \
                     --title "Release ${{ github.run_number }}" \
                     --body "$(echo -e "**Date:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")<br> \
