@@ -20,7 +20,7 @@ jobs:
 
             - name: Ssh and deploy
               run: |
-                  echo ssh ${{ secrets.USER }}@${{ secrets.HOST }}
+                  ssh ${{ secrets.USER }}@${{ secrets.HOST }}
                   echo "${{ secrets.YANDEX_CLOUD_CR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
                   docker pull cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
                   docker run -p 3000:3000 cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
