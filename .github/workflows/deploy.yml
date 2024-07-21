@@ -19,16 +19,11 @@ jobs:
               run: docker login --username oauth --password ${{ secrets.YANDEX_CLOUD_CR_TOKEN }} cr.yandex
 
             - name: Ssh and deploy
-              uses: appleboy/ssh-action@master
-              with:
-                  host: ${{ secrets.HOST }}
-                  username: ${{ secrets.USER }}
-                  key: ${{ secrets.SSH_KEY }}
-                  script: |
-                      echo ssh ${{ secrets.USER }}@${{ secrets.HOST }}
-                      echo "${{ secrets.YANDEX_CLOUD_CR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
-                      docker pull cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
-                      docker run -p 3000:3000 cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
+              run: |
+                  echo ssh ${{ secrets.USER }}@${{ secrets.HOST }}
+                  echo "${{ secrets.YANDEX_CLOUD_CR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+                  docker pull cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
+                  docker run -p 3000:3000 cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
 
             - name: Set Date
               run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
