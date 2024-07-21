@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+    workflow_dispatch:
+        inputs:
+            release_version:
+                required: true
+
+permissions:
+    contents: read
+    issues: write
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Log in to Yandex Cloud Container Registry
+              run: docker login --username oauth --password ${{ secrets.YANDEX_CLOUD_CR_TOKEN }} cr.yandex
+
+            - name: Check if exists in CR
+              run: |
+                  if ! docker manifest inspect cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest; then
+                    echo "Image not found!" && exit 1
+                  fi
+
+            - name: Ssh and deploy
+              uses: appleboy/ssh-action@master
+              with:
+                  script: |
+                      echo ssh artem@${{ secrets.HOST }}
+                      echo "${{ secrets.YANDEX_CLOUD_CR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+                      docker pull cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
+                      docker run -p 3000:3000 cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest
+
+            - name: Set Date
+              run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Update Issue with deployment information
+              run: |
+                  issue_number=$(gh issue list --label release-${{ github.event.inputs.release_version }} --json number --jq '.[0].number')
+                  gh issue comment "$issue_number" --body "$BODY"
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  BODY: |
+                      ### Release ${{ github.event.inputs.release_version }} deployed to production.
+                      **Дата:** ${{ env.CURRENT_DATE }}
+                      **Автор:** ${{ github.actor }}
+                      **Docker образ:** [Ссылка](http://cr.yandex/crpq1kj1kt8f62udc6t3/shri-infra:${{ github.event.inputs.release_version }}_latest)

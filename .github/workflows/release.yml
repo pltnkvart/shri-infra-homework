@@ -92,7 +92,7 @@ jobs:
                       **Author:** ${{ github.actor }}<br> \
                       **Version:** ${{ github.run_number }}<br> \
                       **Commits:**<br>$commit_list<br> \
-                      **Docker Image:** cr.yandex/crpvtl1jahgdv5iobshc/app:${{ github.run_number }}")"
+                      **Docker Image:** cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.run_number }}")"
 
     update-changelog:
         runs-on: ubuntu-latest
