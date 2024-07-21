@@ -18,12 +18,6 @@ jobs:
             - name: Log in to Yandex Cloud Container Registry
               run: docker login --username oauth --password ${{ secrets.YANDEX_CLOUD_CR_TOKEN }} cr.yandex
 
-            - name: Check if exists in CR
-              run: |
-                  if ! docker manifest inspect cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest; then
-                    echo "Image not found!" && exit 1
-                  fi
-
             - name: Ssh and deploy
               uses: appleboy/ssh-action@master
               with:
