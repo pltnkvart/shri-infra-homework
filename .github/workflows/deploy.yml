@@ -15,11 +15,11 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - uses: actions/checkout@v4
             - name: Log in to Yandex Cloud Container Registry
               run: docker login --username oauth --password ${{ secrets.YANDEX_CLOUD_CR_TOKEN }} cr.yandex
 
             - name: Ssh
-              uses: actions/checkout@v4
               uses: webfactory/ssh-agent@v0.9.0
               with:
                   ssh-private-key: ${{ secrets.SSH_KEY }}
@@ -32,7 +32,7 @@ jobs:
 
             - name: Docker run
               run: docker run -p 3000:3000 cr.yandex/crpvtl1jahgdv5iobshc/shri-infra:${{ github.event.inputs.release_version }}_latest 
-              
+
             - name: Set Date
               run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
